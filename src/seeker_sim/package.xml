@@ -3,7 +3,7 @@
   <name>seeker_sim</name>
   <version>0.1.0</version>
   <description>Seeker robot in Gazebo: model, world, bridge and launch file.</description>
-  <maintainer email="afhama@digitalauxilius.com">afhama</maintainer>
+  <maintainer email="afham12ahmed@gmail.com">Afham Ahmed</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

@@ -23,6 +23,11 @@ Visualization Manager:
       Enabled: true
       Topic:
         Value: /camera/image_raw
+    - Class: rviz_default_plugins/Image
+      Name: YOLO
+      Enabled: true
+      Topic:
+        Value: /detections/image
   Enabled: true
   Global Options:
     Fixed Frame: odom
