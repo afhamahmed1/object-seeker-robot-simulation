@@ -3,22 +3,6 @@
 A small robot with a camera in Gazebo. YOLO looks at the camera images and finds objects
 (a person and a fire hydrant), and the robot drives to the one you choose.
 
-## Stages (git branches)
-
-Each stage has its own branch. `main` always holds the latest finished stage.
-
-| Branch | What it adds | Status |
-|---|---|---|
-| `stage-1-robot-sim` | Robot + camera in Gazebo, keyboard driving | done |
-| `stage-2-yolo` | YOLO finds objects in the camera image | done |
-| `stage-3-follow` | Robot searches for an object and drives to it | done |
-
-Open a stage, then rebuild from clean:
-
-```bash
-git switch stage-1-robot-sim
-rm -rf build install log && colcon build
-```
 
 ## 1. One-time setup: YOLO
 
@@ -109,6 +93,23 @@ Gazebo camera ──► bridge ──/camera/image_raw──► yolo_node ──
                                                           └─/detections/image──► RViz
 follow_node (or keyboard) ──/cmd_vel──► bridge ──► Gazebo: DiffDrive turns the wheels
 Gazebo ──/odom /tf /joint_states──► bridge ──► robot_state_publisher, RViz
+```
+
+## Stages (git branches)
+
+Each stage has its own branch. `main` always holds the latest finished stage.
+
+| Branch | What it adds | Status |
+|---|---|---|
+| `stage-1-robot-sim` | Robot + camera in Gazebo, keyboard driving | done |
+| `stage-2-yolo` | YOLO finds objects in the camera image | done |
+| `stage-3-follow` | Robot searches for an object and drives to it | done |
+
+Open a stage, then rebuild from clean:
+
+```bash
+git switch stage-1-robot-sim
+rm -rf build install log && colcon build
 ```
 
 ## If something goes wrong
