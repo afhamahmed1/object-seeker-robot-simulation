@@ -1,7 +1,7 @@
 # Object Seeker
 
 A small robot with a camera in Gazebo. YOLO looks at the camera images and finds objects
-(a person and a fire hydrant). The next stage makes the robot drive to them.
+(a person and a fire hydrant), and the robot drives to the one you choose.
 
 ## Stages (git branches)
 
@@ -11,7 +11,7 @@ Each stage has its own branch. `main` always holds the latest finished stage.
 |---|---|---|
 | `stage-1-robot-sim` | Robot + camera in Gazebo, keyboard driving | done |
 | `stage-2-yolo` | YOLO finds objects in the camera image | done |
-| `stage-3-follow` | Robot drives to the object it found | next |
+| `stage-3-follow` | Robot searches for an object and drives to it | done |
 
 Open a stage, then rebuild from clean:
 
@@ -65,13 +65,20 @@ ros2 run seeker_yolo yolo_node
 
 It prints `Found: person 0.91` and so on, and RViz shows the boxes in the **YOLO** panel.
 
-Terminal 3 — drive with the keyboard (`i` forward, `j`/`l` turn, `,` back, `k` stop).
-Turn right to find the fire hydrant:
+Terminal 3 — follow the person:
 
 ```bash
-source /opt/ros/jazzy/setup.bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
+source ~/Robotics/Projects/object_seeker_ws/install/setup.bash
+ros2 run seeker_follow follow_node
 ```
+
+The robot turns until it sees the person, drives up to them and stops about 1.5 m away.
+Then try:
+
+- **Another target:** `ros2 run seeker_follow follow_node --ros-args -p target:="fire hydrant"`
+- **Moving target:** in Gazebo, pick the Translate tool (`T`), drag the person, and the robot follows.
+- **Drive by hand:** stop `follow_node` first (both send `/cmd_vel`), then
+  `ros2 run teleop_twist_keyboard teleop_twist_keyboard` (`i` forward, `j`/`l` turn, `k` stop).
 
 Tip: add `source /opt/ros/jazzy/setup.bash` to `~/.bashrc` so every new terminal has ROS.
 
@@ -80,7 +87,7 @@ Tip: add `source /opt/ros/jazzy/setup.bash` to `~/.bashrc` so every new terminal
 ```bash
 ros2 topic hz /camera/image_raw       # camera, about 15 per second
 ros2 topic echo /detections           # boxes found by YOLO
-ros2 run rqt_image_view rqt_image_view   # pick /detections/image
+ros2 topic echo /cmd_vel              # speed commands from follow_node
 ```
 
 ## Files
@@ -93,23 +100,27 @@ ros2 run rqt_image_view rqt_image_view   # pick /detections/image
 | `src/seeker_sim/launch/sim.launch.py` | Starts Gazebo, the robot, the bridge and RViz |
 | `src/seeker_sim/rviz/seeker.rviz` | RViz layout: robot, frames, camera and YOLO views |
 | `src/seeker_yolo/seeker_yolo/yolo_node.py` | Runs YOLO on each camera image and publishes the boxes |
+| `src/seeker_follow/seeker_follow/follow_node.py` | Turns the boxes into speed commands: search, steer, drive, stop |
 
 ## How it fits together
 
 ```
-keyboard ──/cmd_vel──► bridge ──► Gazebo: DiffDrive turns the wheels
-Gazebo camera ──► bridge ──/camera/image_raw──► yolo_node ──/detections────────► (Stage 3: follow)
+Gazebo camera ──► bridge ──/camera/image_raw──► yolo_node ──/detections──► follow_node
                                                           └─/detections/image──► RViz
+follow_node (or keyboard) ──/cmd_vel──► bridge ──► Gazebo: DiffDrive turns the wheels
 Gazebo ──/odom /tf /joint_states──► bridge ──► robot_state_publisher, RViz
 ```
 
 ## If something goes wrong
 
 - **Gazebo window is black or crashes:** run `export LIBGL_ALWAYS_SOFTWARE=1`, then launch again.
-- **Robot doesn't move:** click on the teleop terminal first; it only reads keys when focused.
+- **Robot doesn't move with the keyboard:** click on the teleop terminal first; it only reads keys when focused.
 - **`No module named 'ultralytics'`:** run `source ~/yolo_venv/bin/activate` in that terminal first.
+- **follow_node says "Waiting for /detections":** start `yolo_node` (terminal 2).
+- **Robot keeps spinning:** it can't see the target. Check the YOLO panel in RViz and the target name.
 - **YOLO is slow:** normal on a CPU; it skips old frames and always uses the newest one.
 
-## Next
+## Ideas for more stages
 
-Stage 3: a node that reads `/detections` and drives the robot towards the person.
+- Map the world with `slam_toolbox`, then patrol it with Nav2 while YOLO reports what it sees.
+- Train YOLO on your own object using images from the robot's camera.

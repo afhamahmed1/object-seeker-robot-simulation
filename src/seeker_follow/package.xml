@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>seeker_follow</name>
+  <version>0.1.0</version>
+  <description>Drives the Seeker robot to an object found by YOLO.</description>
+  <maintainer email="afham12ahmed@gmail.com">Afham Ahmed</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>vision_msgs</exec_depend>
+  <exec_depend>seeker_yolo</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
